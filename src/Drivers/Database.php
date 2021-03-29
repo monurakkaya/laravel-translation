@@ -118,7 +118,7 @@ class Database extends Translation implements DriverInterface
                 'key' => $key,
                 'value' => $value,
             ]);
-        cache()->forget('single-translations');
+        cache()->forget('single-translations-'.$language);
     }
 
     /**
@@ -145,7 +145,7 @@ class Database extends Translation implements DriverInterface
                 'key' => $key,
                 'value' => $value,
             ]);
-        cache()->forget('single-translations');
+        cache()->forget('single-translations-'.$language);
     }
 
     /**
@@ -156,7 +156,7 @@ class Database extends Translation implements DriverInterface
      */
     public function getSingleTranslationsFor($language)
     {
-        $translations = cache()->rememberForever('single-translations', function () use ($language) {
+        $translations = cache()->rememberForever('single-translations-'.$language, function () use ($language) {
             return $this->getLanguage($language)
                 ->translations()
                 ->where('group', 'like', '%single')
@@ -169,7 +169,7 @@ class Database extends Translation implements DriverInterface
         // update to 'single'. We do this here so it only happens once.
         if ($this->hasLegacyGroups($translations->keys())) {
             TranslationModel::whereNull('group')->update(['group' => 'single']);
-            cache()->forget('single-translations');
+            cache()->forget('single-translations-'.$language);
             // if any legacy groups exist, rerun the method so we get the
             // updated keys.
             return $this->getSingleTranslationsFor($language);
@@ -190,7 +190,7 @@ class Database extends Translation implements DriverInterface
      */
     public function getGroupTranslationsFor($language)
     {
-        $translations = cache()->rememberForever('group-translations', function () use ($language) {
+        $translations = cache()->rememberForever('group-translations-'.$language, function () use ($language) {
             return $this->getLanguage($language)
                 ->translations()
                 ->whereNotNull('group')
